@@ -1,0 +1,8 @@
+#+TITLE: Todo
+* [?] what options can be passed to `npx shadow-cljs watch frontend`
+* [?] how to hook into `cider-jack-in-cljs`?
+* DONE set up re-frame project
+* DONE get it rendering a basic component
+** e.g. a button which logs click events
+* TODO add tailwind with JIT mode
+* TODO design program logic
