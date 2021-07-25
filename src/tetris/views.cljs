@@ -1,9 +1,24 @@
 (ns tetris.views
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as rf]
    [reagent.core :as r]
    [tetris.subs :as subs]
-   ))
+   [tetris.events :as events]))
+
+(defn- dispatch-time-update []
+  (let [elapsed-time @(rf/subscribe [::subs/elapsed-game-time])]
+    (rf/dispatch [::events/game-timer (inc elapsed-time)])))
+
+(defn- start-game-timer! []
+  (let [interval-id (js/setInterval dispatch-time-update 1000)]
+    (rf/dispatch [::events/set-timer-interval-id interval-id])))
+
+(defonce do-timer (start-game-timer!))
+
+(defn- game-timer []
+  (let [elapsed-time @(rf/subscribe [::subs/elapsed-game-time])]
+    [:h1
+     elapsed-time]))
 
 (defn playfield []
   (let [rows-count 16
@@ -24,15 +39,15 @@
              {:class ["p-0 border border-purple-400 text-center select-none"]}])])]]]))
 
 (defn main-panel []
-  (let [name (re-frame/subscribe [::subs/name])]
+  [:div
+   {:class "container"}
+   [:div
+    {:class ["row" "flex" "justify-center" "mt-20"]}
     [:div
-     {:class "container"}
-     [:div
-      {:class ["row" "flex" "justify-center" "mt-20"]}
-      [:div
-       {:class ["flex" "flex-col" "items-center"]}
-       [:h1
-        {:class ["mb-2"]}
-        "Tetris"]
-       [playfield]]]
-     ]))
+     {:class ["flex" "flex-col" "items-center"]}
+     [:h1
+      {:class ["mb-2"]}
+      "Tetris"]
+     [game-timer]
+     [playfield]]]
+   ])

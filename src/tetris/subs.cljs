@@ -3,6 +3,6 @@
    [re-frame.core :as re-frame]))
 
 (re-frame/reg-sub
- ::name
+ ::elapsed-game-time
  (fn [db]
-   (:name db)))
+   (:elapsed-game-time db)))

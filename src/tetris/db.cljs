@@ -1,4 +1,5 @@
 (ns tetris.db)
 
 (def default-db
-  {:name "re-frame"})
+  {:timer-interval-id nil
+   :elapsed-game-time 0})
