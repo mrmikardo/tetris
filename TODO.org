@@ -4,5 +4,5 @@
 * DONE set up re-frame project
 * DONE get it rendering a basic component
 ** e.g. a button which logs click events
-* TODO add tailwind with JIT mode
+* DONE add tailwind with JIT mode
 * TODO design program logic
