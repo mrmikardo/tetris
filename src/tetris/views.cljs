@@ -20,10 +20,16 @@
     [:h1
      elapsed-time]))
 
+(defn- coord-in?
+  "Is coord in coords?"
+  [coord coords]
+  (> (count (clojure.set/intersection (set [coord]) (set coords))) 0))
+
 (defn playfield []
   (let [rows-count 16
         cols-count 10
-        cell-size  35]
+        cell-size  35
+        {:keys [:active-tetromino-colour :active-tetromino-coords :base-coords]} @(rf/subscribe [::subs/playfield])]
     [:div {:class ["relative"]}
      [:table
       {:class ["table-fixed border-2 border-purple-700"]
@@ -36,7 +42,11 @@
           (for [j (range cols-count)]
             ^{:key j}
             [:td
-             {:class ["p-0 border border-purple-400 text-center select-none"]}])])]]]))
+             {:style {:background-color (cond
+                                          (coord-in? [j i] active-tetromino-coords) active-tetromino-colour
+                                          (coord-in? [j i] base-coords) "#000000"
+                                          :else "#ffffff")}
+              :class ["p-0 border border-purple-400 text-center select-none"]}])])]]]))
 
 (defn main-panel []
   [:div

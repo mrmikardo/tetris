@@ -4,13 +4,24 @@
    [tetris.db :as db]
    ))
 
+;; a tetromino is denoted by its starting coords, just outside of the visible playfield
+(defonce tetrominos [
+                     {:coords [[4 -1] [5 -1] [6 -1] [7 -1]] :colour "#6dedef"} ;; I
+                     {:coords [[5 -1] [5 -2] [6 -1] [7 -1]] :colour "#0016e4"} ;; J
+                     {:coords [[5 -1] [6 -1] [7 -1] [7 -2]] :colour "#e4a338"} ;; L
+                     {:coords [[5 -1] [5 -2] [6 -1] [6 -2]] :colour "#f1f04f"} ;; O
+                     {:coords [[5 -1] [6 -1] [6 -2] [7 -2]] :colour "#6eec47"} ;; S
+                     {:coords [[5 -1] [6 -1] [6 -2] [7 -1]] :colour "#9226ea"} ;; T
+                     {:coords [[5 -2] [6 -2] [6 -1] [7 -1]] :colour "#dd2f21"} ;; Z
+                     ])
+
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ _]
    db/default-db))
 
-(defn- update-active-tetronomion
-  "Move the currently falling tetronomion one coord closer to the base."
+(defn- update-tetromino-position
+  "Move the currently falling tetromino one coord closer to the base."
   [coords]
   (map #(vector (first %) (+ 1 (second %))) coords))
 
@@ -26,16 +37,18 @@
       1))
 
 (defn- update-playfield [playfield]
-  (let [{:keys [active-tetronomion-coords base-coords]} playfield]
-    (if (contiguous-with-base? active-tetronomion-coords base-coords)
-      (-> playfield
-        ;; wipe active tetronomion piece
-        (dissoc :active-tetronomion-coords)
-        ;; update base coords to include tetronomion piece
-        (assoc :base-coords (concat base-coords active-tetronomion-coords))
-        ;; TODO set up next tetronomion to fall from the sky...
-        )
-      (assoc playfield :active-tetronomion-coords (update-active-tetronomion active-tetronomion-coords)))))
+  (let [{:keys [active-tetromino-coords active-tetromino-colours base-coords]} playfield]
+    (if (contiguous-with-base? active-tetromino-coords base-coords)
+      (let [next-tetromino (rand-nth tetrominos)]
+        (-> playfield
+            ;; wipe active tetromino piece
+            (dissoc :active-tetromino-coords)
+            ;; update base coords to include tetromino piece
+            (assoc :base-coords (concat base-coords active-tetromino-coords))
+            ;; set up next tetromino to fall from the 'sky'
+            (assoc :active-tetromino-coords (:coords next-tetromino))
+            (assoc :active-tetromino-colour (:colour next-tetromino))))
+      (assoc playfield :active-tetromino-coords (update-tetromino-position active-tetromino-coords)))))
 
 ;; handle clock events
 (re-frame/reg-event-db

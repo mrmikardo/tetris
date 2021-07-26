@@ -4,7 +4,8 @@
   {:timer-interval-id nil
    :elapsed-game-time 0
    :playfield {
-               :active-tetronomion-coords [[1 0] [2 0] [1 -1] [2 -1]]
+               :active-tetromino-colour "#dd2f21"
+               :active-tetromino-coords [[1 0] [2 0] [1 -1] [2 -1]]
                ;; to start with, base is the bottom row
                :base-coords [[0 15]
                              [1 15]
