@@ -15,15 +15,15 @@
   (map #(vector (first %) (+ 1 (second %))) coords))
 
 (defn- contiguous-with-base?
-  "A tetronomion is contiguous with the base if it shares at least a single
-  edge with one of the edges of the base (i.e. 2 coords)."
-  [tetronomion-coords base-coords]
+  "A tetromino is contiguous with the base if on the next tick of the clock
+  its coords would overlap with the base coords."
+  [tetromino-coords base-coords]
   (>=
       (count
        (clojure.set/intersection
-        (set tetronomion-coords)
+        (set (update-tetromino-position tetromino-coords))
         (set base-coords)))
-      2))
+      1))
 
 (defn- update-playfield [playfield]
   (let [{:keys [active-tetronomion-coords base-coords]} playfield]
