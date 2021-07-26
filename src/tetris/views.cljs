@@ -44,7 +44,7 @@
             [:td
              {:style {:background-color (cond
                                           (coord-in? [j i] active-tetromino-coords) active-tetromino-colour
-                                          (coord-in? [j i] base-coords) "#000000"
+                                          (coord-in? [j i] (keys base-coords)) (get base-coords [j i])
                                           :else "#ffffff")}
               :class ["p-0 border border-purple-400 text-center select-none"]}])])]]]))
 

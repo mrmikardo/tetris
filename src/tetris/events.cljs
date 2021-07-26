@@ -36,16 +36,19 @@
         (set base-coords)))
       1))
 
+(defn- merge-colour-with-coords [coords colour]
+  (apply hash-map (interleave coords (repeat colour))))
+
 (defn- update-playfield [playfield]
-  (let [{:keys [active-tetromino-coords active-tetromino-colours base-coords]} playfield]
-    (if (contiguous-with-base? active-tetromino-coords base-coords)
+  (let [{:keys [active-tetromino-coords active-tetromino-colour base-coords]} playfield]
+    (if (contiguous-with-base? active-tetromino-coords (keys base-coords))
       (let [next-tetromino (rand-nth tetrominos)]
         (-> playfield
             ;; wipe active tetromino piece
             (dissoc :active-tetromino-coords)
             ;; update base coords to include tetromino piece
-            (assoc :base-coords (concat base-coords active-tetromino-coords))
-            ;; set up next tetromino to fall from the 'sky'
+            (assoc :base-coords (merge base-coords (merge-colour-with-coords active-tetromino-coords active-tetromino-colour)))
+            ;; set up next tetromino to fall from the sky
             (assoc :active-tetromino-coords (:coords next-tetromino))
             (assoc :active-tetromino-colour (:colour next-tetromino))))
       (assoc playfield :active-tetromino-coords (update-tetromino-position active-tetromino-coords)))))
