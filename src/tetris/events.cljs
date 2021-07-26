@@ -1,6 +1,6 @@
 (ns tetris.events
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as rf]
    [tetris.db :as db]
    ))
 
@@ -15,7 +15,7 @@
                      {:coords [[5 -2] [6 -2] [6 -1] [7 -1]] :colour "#dd2f21"} ;; Z
                      ])
 
-(re-frame/reg-event-db
+(rf/reg-event-db
  ::initialize-db
  (fn [_ _]
    db/default-db))
@@ -54,7 +54,7 @@
       (assoc playfield :active-tetromino-coords (update-tetromino-position active-tetromino-coords)))))
 
 ;; handle clock events
-(re-frame/reg-event-db
+(rf/reg-event-db
  ::game-timer
  (fn [db [_ new-time-value]]
    (-> db
@@ -65,7 +65,7 @@
 
 ;; set the ID of the DOM interval timer
 ;; we'll need this later to clear the state (stop the game)
-(re-frame/reg-event-db
+(rf/reg-event-db
  ::set-timer-interval-id
  (fn [db [_ interval-id]]
    (assoc db :timer-interval-id interval-id)))
