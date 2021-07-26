@@ -20,6 +20,7 @@
     [:h1
      elapsed-time]))
 
+;; TODO move this to utils
 (defn- coord-in?
   "Is coord in coords?"
   [coord coords]

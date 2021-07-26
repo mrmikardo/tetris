@@ -5,4 +5,6 @@
 * DONE get it rendering a basic component
 ** e.g. a button which logs click events
 * DONE add tailwind with JIT mode
-* TODO design program logic
+* TODO handle keyboard events
+* TODO tidy up a bit
+** TODO utils module (for starters)
