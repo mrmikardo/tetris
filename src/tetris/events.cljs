@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [tetris.db :as db]
+   [re-pressed.core :as rp]
    ))
 
 ;; a tetromino is denoted by its starting coords, just outside of the visible playfield
@@ -15,15 +16,56 @@
                      {:coords [[5 -2] [6 -2] [6 -1] [7 -1]] :colour "#dd2f21"} ;; Z
                      ])
 
-(rf/reg-event-db
- ::initialize-db
- (fn [_ _]
-   db/default-db))
+
+(def default-keydown-rules
+  {:event-keys [
+                [
+                 [::left-arrow]
+                 [{:keyCode 37}]  ;; LEFT
+                 ]
+                [
+                 [::right-arrow]
+                 [{:keyCode 39}]  ;; RIGHT
+                 ]
+                [
+                 [::down-arrow]
+                 [{:keyCode 40}]  ;; DOWN
+                 ]
+                ]})
 
 (defn- update-tetromino-position
   "Move the currently falling tetromino one coord closer to the base."
   [coords]
   (map #(vector (first %) (+ 1 (second %))) coords))
+
+;; TODO bounds checking
+(rf/reg-event-db
+ ::left-arrow
+ (fn [db [_ _ _]]
+   (let [{:keys [playfield]} db
+         {:keys [active-tetromino-coords]} playfield]
+     (assoc-in db [:playfield :active-tetromino-coords] (map #(vector (- (first %) 1) (second %)) active-tetromino-coords)))))
+
+(rf/reg-event-db
+ ::right-arrow
+ (fn [db [_ _ _]]
+   (let [{:keys [playfield]} db
+         {:keys [active-tetromino-coords]} playfield]
+     (assoc-in db [:playfield :active-tetromino-coords] (map #(vector (+ 1 (first %)) (second %)) active-tetromino-coords)))))
+
+(rf/reg-event-db
+ ::down-arrow
+ (fn [db [_ _ _]]
+   (let [{:keys [playfield]} db
+         {:keys [active-tetromino-coords]} playfield]
+     (assoc-in db [:playfield :active-tetromino-coords] (update-tetromino-position active-tetromino-coords)))))
+
+(rf/reg-event-fx
+ ::initialize
+ (fn [_ [_ _]]
+   {:fx [[:dispatch [::rp/add-keyboard-event-listener "keydown"]]
+         [:dispatch [::rp/set-keydown-rules default-keydown-rules]]]
+    :db db/default-db}))
 
 (defn- contiguous-with-base?
   "A tetromino is contiguous with the base if on the next tick of the clock
@@ -69,3 +111,13 @@
  ::set-timer-interval-id
  (fn [db [_ interval-id]]
    (assoc db :timer-interval-id interval-id)))
+
+(rf/reg-event-fx
+ ::key-down
+ (fn [cofx [_ e]]
+   (println "KEY PRESSED")))
+
+(rf/reg-event-fx
+ ::table-clicked
+ (fn [cofx [_ e]]
+   (println "TABLE CLICKED")))
