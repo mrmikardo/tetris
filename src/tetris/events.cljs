@@ -33,10 +33,10 @@
                  ]
                 ]})
 
-(defn- update-tetromino-position
-  "Move the currently falling tetromino one coord closer to the base."
-  [coords]
-  (map #(vector (first %) (+ 1 (second %))) coords))
+(defn- translate-tetromino
+  "Translate tetromino-coords by translate-coords."
+  [tetromino-coords translate-coords]
+  (map #(vector (+ (first translate-coords) (first %)) (+ (second translate-coords) (second %))) tetromino-coords))
 
 ;; TODO bounds checking
 (rf/reg-event-db
@@ -44,21 +44,21 @@
  (fn [db [_ _ _]]
    (let [{:keys [playfield]} db
          {:keys [active-tetromino-coords]} playfield]
-     (assoc-in db [:playfield :active-tetromino-coords] (map #(vector (- (first %) 1) (second %)) active-tetromino-coords)))))
+     (assoc-in db [:playfield :active-tetromino-coords] (translate-tetromino active-tetromino-coords [-1 0])))))
 
 (rf/reg-event-db
  ::right-arrow
  (fn [db [_ _ _]]
    (let [{:keys [playfield]} db
          {:keys [active-tetromino-coords]} playfield]
-     (assoc-in db [:playfield :active-tetromino-coords] (map #(vector (+ 1 (first %)) (second %)) active-tetromino-coords)))))
+     (assoc-in db [:playfield :active-tetromino-coords] (translate-tetromino active-tetromino-coords [1 0])))))
 
 (rf/reg-event-db
  ::down-arrow
  (fn [db [_ _ _]]
    (let [{:keys [playfield]} db
          {:keys [active-tetromino-coords]} playfield]
-     (assoc-in db [:playfield :active-tetromino-coords] (update-tetromino-position active-tetromino-coords)))))
+     (assoc-in db [:playfield :active-tetromino-coords] (translate-tetromino active-tetromino-coords [0 1])))))
 
 (rf/reg-event-fx
  ::initialize
@@ -74,7 +74,7 @@
   (>=
       (count
        (clojure.set/intersection
-        (set (update-tetromino-position tetromino-coords))
+        (set (translate-tetromino tetromino-coords [0 1]))
         (set base-coords)))
       1))
 
@@ -93,7 +93,7 @@
             ;; set up next tetromino to fall from the sky
             (assoc :active-tetromino-coords (:coords next-tetromino))
             (assoc :active-tetromino-colour (:colour next-tetromino))))
-      (assoc playfield :active-tetromino-coords (update-tetromino-position active-tetromino-coords)))))
+      (assoc playfield :active-tetromino-coords (translate-tetromino active-tetromino-coords [0 1])))))
 
 ;; handle clock events
 (rf/reg-event-db
