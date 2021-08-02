@@ -34,11 +34,13 @@
                 ]})
 
 (defn- translate-tetromino
-  "Translate tetromino-coords by translate-coords."
-  [tetromino-coords translate-coords]
-  (map #(vector (+ (first translate-coords) (first %)) (+ (second translate-coords) (second %))) tetromino-coords))
+  "Translate tetromino-coords by [x y], respecting the bounds of the playfield."
+  [tetromino-coords [x y]]
+  (let [translated-coords (map #(vector (+ x (first %)) (+ y (second %))) tetromino-coords)]
+    (if (some #(or (neg? %) (> % 9)) (flatten translated-coords))
+      tetromino-coords
+      translated-coords)))
 
-;; TODO bounds checking
 (rf/reg-event-db
  ::left-arrow
  (fn [db [_ _ _]]
