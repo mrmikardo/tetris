@@ -99,9 +99,8 @@
             (assoc :active-tetromino-colour (:colour next-tetromino))))
       (assoc playfield :active-tetromino-coords (translate-tetromino active-tetromino-coords [0 1])))))
 
-;; handle clock events
 (rf/reg-event-db
- ::game-timer
+ ::start-game-timer
  (fn [db [_ new-time-value]]
    (-> db
        ;; update the clock
