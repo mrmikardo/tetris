@@ -116,12 +116,3 @@
  (fn [db [_ interval-id]]
    (assoc db :timer-interval-id interval-id)))
 
-(rf/reg-event-fx
- ::key-down
- (fn [cofx [_ e]]
-   (println "KEY PRESSED")))
-
-(rf/reg-event-fx
- ::table-clicked
- (fn [cofx [_ e]]
-   (println "TABLE CLICKED")))
