@@ -37,7 +37,8 @@
   "Translate tetromino-coords by [x y], respecting the bounds of the playfield."
   [tetromino-coords [x y]]
   (let [translated-coords (map #(vector (+ x (first %)) (+ y (second %))) tetromino-coords)]
-    (if (some #(or (neg? %) (> % 9)) (flatten translated-coords))
+    (if (or (some #(or (neg? %) (> % 9)) (map #(first %) translated-coords))
+            (some #(> % 15) (map #(second %) translated-coords)))
       tetromino-coords
       translated-coords)))
 
@@ -76,7 +77,8 @@
   (>=
       (count
        (clojure.set/intersection
-        (set (translate-tetromino tetromino-coords [0 1]))
+        ;; have to manually translate here, to avoid bounds-checking
+        (set (map #(vector (first %) (+ 1 (second %))) tetromino-coords))
         (set base-coords)))
       1))
 
