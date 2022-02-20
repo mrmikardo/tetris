@@ -10,6 +10,7 @@
 * TODO tidy up a bit
 ** TODO utils module (for starters)
 *** events/get-rotation-matrix-by-id-and-tag should live here
+*** subs should not import events!
 ** TODO simplify some names...
 * DONE finish tetromino rotation coords
 * TODO `tetrominos` should probably be a map of tag -> vals
