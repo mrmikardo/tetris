@@ -44,7 +44,8 @@
   (let [rows-count 16
         cols-count 10
         cell-size  35
-        {:keys [:active-tetromino-colour :active-tetromino-coords :base-coords]} @(rf/subscribe [::subs/playfield])]
+        {:keys [:active-tetromino-colour :base-coords]} @(rf/subscribe [::subs/playfield])
+        active-tetromino-coords @(rf/subscribe [::subs/active-tetromino-coords])]
     [:div {:class ["relative"]}
      [:table
       {:class ["table-fixed border-2"]
