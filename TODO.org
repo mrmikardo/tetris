@@ -1,10 +1,17 @@
 #+TITLE: Todo
 * [?] what options can be passed to `npx shadow-cljs watch frontend`
 * [?] how to hook into `cider-jack-in-cljs`?
+* [?] when to use def vs defonce
 * DONE set up re-frame project
 * DONE get it rendering a basic component
 ** e.g. a button which logs click events
 * DONE add tailwind with JIT mode
-* TODO handle keyboard events
+* DONE handle keyboard events
 * TODO tidy up a bit
 ** TODO utils module (for starters)
+*** events/get-rotation-matrix-by-id-and-tag should live here
+** TODO simplify some names...
+* DONE finish tetromino rotation coords
+* TODO `tetrominos` should probably be a map of tag -> vals
+** doesn't make sense as a vector of maps
+* TODO hitting SPC should drop the block in place
