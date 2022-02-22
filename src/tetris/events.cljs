@@ -26,8 +26,6 @@
                  ]
                 ]})
 
-
-
 (rf/reg-event-db
  ::left-arrow
  (fn [db _]
@@ -57,12 +55,9 @@
          [:dispatch [::rp/set-keydown-rules keydown-rules]]]
     :db db/default-db}))
 
-(defn- merge-colour-with-coords [coords colour]
-  (apply hash-map (interleave coords (repeat colour))))
-
 (defn- update-playfield [playfield]
-  (let [active-tetromino (:active-tetromino playfield)
-        {:keys [coords colour tag rotation-matrix]} active-tetromino
+  (let [tetromino (:active-tetromino playfield)
+        {:keys [coords colour tag rotation-matrix]} tetromino
         rotated-coords (geom/rotate coords rotation-matrix)
         base-coords (:base-coords playfield)]
     (if (geom/contiguous? rotated-coords base-coords)
@@ -70,7 +65,8 @@
           ;; wipe active tetromino piece
           (dissoc :active-tetromino)
           ;; update base coords to include tetromino piece
-          (assoc :base-coords (merge base-coords (merge-colour-with-coords rotated-coords colour)))
+          (assoc :base-coords (merge base-coords
+                                     (apply hash-map (interleave rotated-coords (repeat colour)))))
           ;; set up next tetromino to fall from the sky
           (assoc :active-tetromino (rand-nth db/tetrominos)))
       (update-in playfield [:active-tetromino] geom/translate [0 1]))))
