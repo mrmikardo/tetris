@@ -3,7 +3,8 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [tetris.subs :as subs]
-   [tetris.events :as events]))
+   [tetris.events :as events]
+   [tetris.geometry :as geom]))
 
 (defn- dispatch-time-update []
   (let [elapsed-time @(rf/subscribe [::subs/elapsed-game-time])]
@@ -34,18 +35,12 @@
             :on-click stop-game-timer!}
    "Stop timer"])
 
-;; TODO move this to utils
-(defn- coord-in?
-  "Is coord in coords?"
-  [coord coords]
-  (> (count (clojure.set/intersection (set [coord]) (set coords))) 0))
-
 (defn playfield []
   (let [rows-count 16
         cols-count 10
         cell-size  35
         {:keys [:colour :coords :rotation-matrix]} @(rf/subscribe [::subs/active-tetromino])
-        rotated-coords (events/rotate coords rotation-matrix)
+        rotated-coords (geom/rotate coords rotation-matrix)
         base-coords @(rf/subscribe [::subs/base-coords])]
     [:div {:class ["relative"]}
      [:table
@@ -60,8 +55,8 @@
             ^{:key j}
             [:td
              {:style {:background-color (cond
-                                          (coord-in? [j i] rotated-coords) colour
-                                          (coord-in? [j i] (keys base-coords)) (get base-coords [j i])
+                                          (geom/coord-in? [j i] rotated-coords) colour
+                                          (geom/coord-in? [j i] (keys base-coords)) (get base-coords [j i])
                                           :else "#ffffff")}
               :class ["p-0 border border-purple-400 text-center select-none"]}])])]]]))
 
