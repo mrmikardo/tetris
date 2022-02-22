@@ -7,15 +7,17 @@
 ** e.g. a button which logs click events
 * DONE add tailwind with JIT mode
 * DONE handle keyboard events
-* TODO tidy up a bit
-** TODO utils module (for starters)
+* DONE tidy up a bit
+** DONE utils module (for starters)
 *** events/get-rotation-matrix-by-id-and-tag should live here
 *** subs should not import events!
-** TODO simplify some names...
+** DONE simplify some names...
 * DONE finish tetromino rotation coords
-* TODO `tetrominos` should probably be a map of tag -> vals
+* KILL `tetrominos` should probably be a map of tag -> vals
 ** doesn't make sense as a vector of maps
 * TODO hitting SPC should drop the block in place
-* TODO a tetromino should be a bundle of data you pass around
+* DONE a tetromino should be a bundle of data you pass around
 ** i.e. extract the `active-tetromino` from the playfield, and that contains all the info you need
 ** ...rather than, as at present, it's all denormalized in the playfield record
+** DONE should probably extend this to: a tetromino should track its own rotation matrix index?
+* DONE rename merge-colour-with-coords - this name doesn't mean so much!
