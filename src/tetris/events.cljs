@@ -5,71 +5,81 @@
    [re-pressed.core :as rp]
    ))
 
-
-;; the different ways each tetromino can be rotated
-;; a tetromino's position is represented by a vector of coords (see `tetrominos` above)
-;; + a rotation matrix represented by the coords below. The first set of coords in each
-;; vector this will always be a set of 0s, as it represents the 'canonical' un-rotated
-;; variant of a tetromino. The remaining vectors represent the block rotated 90 degrees
-;; in a given direction.
-(def tag-to-rotations
-  {:I [
-       [[0 0] [0 0] [0 0] [0 0]]
+(def rotation-matrices
+  {:I {[[0 0] [0 0] [0 0] [0 0]]
+       [[2 -1] [1 0] [0 1] [-1 2]]
        [[2 -1] [1 0] [0 1] [-1 2]]
        [[0 1] [0 1] [0 1] [0 1]]
+       [[0 1] [0 1] [0 1] [0 1]]
        [[1 -1] [0 0] [-1 1] [-2 2]]
-       ]
-   :J [
+       [[1 -1] [0 0] [-1 1] [-2 2]]
+       [[0 0] [0 0] [0 0] [0 0]]}
+   :J {
        [[0 0] [0 0] [0 0] [0 0]]
        [[1 -1] [2 0] [0 0] [-1 1]]
+       [[1 -1] [2 0] [0 0] [-1 1]]
+       [[2 0] [2 2] [0 0] [-2 0]]
        [[2 0] [2 2] [0 0] [-2 0]]
        [[1 1] [0 2] [0 0] [-1 -1]]
-       ]
-   :L [
+       [[1 1] [0 2] [0 0] [-1 -1]]
+       [[0 0] [0 0] [0 0] [0 0]]
+       }
+   :L {
        [[0 0] [0 0] [0 0] [0 0]]
        [[1 -1] [0 0] [-1 1] [0 2]]
+       [[1 -1] [0 0] [-1 1] [0 2]]
+       [[2 0] [0 0] [-2 0] [-2 2]]
        [[2 0] [0 0] [-2 0] [-2 2]]
        [[1 1] [0 0] [-1 -1] [-2 0]]
-       ]
-   :O [
+       [[1 1] [0 0] [-1 -1] [-2 0]]
+       [[0 0] [0 0] [0 0] [0 0]]
+       }
+   :O {
        [[0 0] [0 0] [0 0] [0 0]]
        [[0 0] [0 0] [0 0] [0 0]]
-       [[0 0] [0 0] [0 0] [0 0]]
-       [[0 0] [0 0] [0 0] [0 0]]
-       ]
-   :S [
+       }
+   :S {
        [[0 0] [0 0] [0 0] [0 0]]
        [[1 -1] [0 0] [1 1] [0 2]]
+       [[1 -1] [0 0] [1 1] [0 2]]
+       [[2 0] [0 0] [0 2] [-2 2]]
        [[2 0] [0 0] [0 2] [-2 2]]
        [[1 1] [0 0] [-1 1] [-2 0]]
-       ]
-   :T [
+       [[1 1] [0 0] [-1 1] [-2 0]]
+       [[0 0] [0 0] [0 0] [0 0]]
+       }
+   :T {
        [[0 0] [0 0] [0 0] [0 0]]
        [[1 -1] [0 0] [1 1] [-1 1]]
+       [[1 -1] [0 0] [1 1] [-1 1]]
+       [[2 0] [0 0] [0 2] [-2 0]]
        [[2 0] [0 0] [0 2] [-2 0]]
        [[1 1] [0 0] [-1 1] [-1 -1]]
-       ]
-   :Z [
+       [[1 1] [0 0] [-1 1] [-1 -1]]
+       [[0 0] [0 0] [0 0] [0 0]]
+       }
+   :Z {
        [[0 0] [0 0] [0 0] [0 0]]
        [[2 0] [1 1] [0 0] [-1 1]]
+       [[2 0] [1 1] [0 0] [-1 1]]
+       [[2 2] [0 2] [0 0] [-2 0]]
        [[2 2] [0 2] [0 0] [-2 0]]
        [[0 2] [-1 1] [0 0] [-1 -1]]
-       ]})
+       [[0 2] [-1 1] [0 0] [-1 -1]]
+       [[0 0] [0 0] [0 0] [0 0]]
+       }})
 
-(defn get-rotation-matrix-by-id-and-tag [id tag]
-  (get-in tag-to-rotations [tag id]))
-
-(defn apply-rotation-matrix [base-coords rotation-matrix]
-  (loop [result          [(mapv + (first base-coords) (first rotation-matrix))]
-         base-coords     (rest base-coords)
+(defn rotate [coords rotation-matrix]
+  (loop [result [(mapv + (first coords) (first rotation-matrix))]
+         coords (rest coords)
          rotation-matrix (rest rotation-matrix)]
-    (if (empty? base-coords)
+    (if (empty? coords)
       result
-      (recur (conj result (mapv + (first base-coords) (first rotation-matrix)))
-             (rest base-coords)
+      (recur (conj result (mapv + (first coords) (first rotation-matrix)))
+             (rest coords)
              (rest rotation-matrix)))))
 
-(def default-keydown-rules
+(def keydown-rules
   {:event-keys [
                 [
                  [::left-arrow]
@@ -89,74 +99,74 @@
                  ]
                 ]})
 
-(defn- translate-tetromino
+(defn- translate
   "Translate tetromino-coords by [x y], respecting the bounds of the playfield."
-  [tetromino-coords [x y] rotation-matrix]
-  (let [translated-coords (map #(vector (+ x (first %)) (+ y (second %))) tetromino-coords)
-        rotated-coords    (apply-rotation-matrix translated-coords (get-rotation-matrix-by-id-and-tag :I rotation-matrix))]
+  [tetromino [x y]]
+  (let [translated-coords (map #(vector (+ x (first %)) (+ y (second %))) (:coords tetromino))
+        rotated-coords    (rotate translated-coords (:rotation-matrix tetromino))]
     (if (or (some #(or (neg? %) (> % 9)) (map #(first %) rotated-coords))
             (some #(> % 15) (map #(second %) rotated-coords)))
-      tetromino-coords
-      translated-coords)))
+      tetromino
+      (merge tetromino {:coords translated-coords}))))
 
 (rf/reg-event-db
  ::left-arrow
  (fn [db _]
-   (update-in db [:playfield :active-tetromino-base-coords] translate-tetromino [-1 0] (get-in db [:playfield :active-tetromino-rotation-matrix-id]))))
+   (update-in db [:playfield :active-tetromino] translate [-1 0])))
 
 (rf/reg-event-db
  ::right-arrow
  (fn [db _]
-   (update-in db [:playfield :active-tetromino-base-coords] translate-tetromino [1 0] (get-in db [:playfield :active-tetromino-rotation-matrix-id]))))
+   (update-in db [:playfield :active-tetromino] translate [1 0])))
 
 (rf/reg-event-db
  ::down-arrow
  (fn [db _]
-   (update-in db [:playfield :active-tetromino-base-coords] translate-tetromino [0 1] (get-in db [:playfield :active-tetromino-rotation-matrix-id]))))
+   (update-in db [:playfield :active-tetromino] translate [0 1])))
 
 (rf/reg-event-db
  ::up-arrow
  (fn [db _]
-   (update-in db [:playfield :active-tetromino-rotation-matrix-id] #(mod (inc %) 4))))
+   (let [active (get-in db [:playfield :active-tetromino])
+         next (get-in rotation-matrices [(:tag active) (:rotation-matrix active)])]
+     (assoc-in db [:playfield :active-tetromino :rotation-matrix] next))))
 
 (rf/reg-event-fx
  ::initialize
  (fn [_ [_ _]]
    {:fx [[:dispatch [::rp/add-keyboard-event-listener "keydown"]]
-         [:dispatch [::rp/set-keydown-rules default-keydown-rules]]]
+         [:dispatch [::rp/set-keydown-rules keydown-rules]]]
     :db db/default-db}))
 
-(defn- contiguous-with-base?
-  "A tetromino is contiguous with the base if on the next tick of the clock
-  its coords would overlap with the base coords."
-  [tetromino-coords base-coords]
+(defn- contiguous?
+  "A set of coords `c1`` is contiguous with another set `c2` if
+  on the next tick of the clock the sets would overlap."
+  [c1 c2]
   (>=
       (count
        (clojure.set/intersection
         ;; have to manually translate here, to avoid bounds-checking
-        (set (map #(vector (first %) (+ 1 (second %))) tetromino-coords))
-        (set base-coords)))
+        (set (map #(vector (first %) (inc (second %))) c1))
+        (set (keys c2))))
       1))
 
 (defn- merge-colour-with-coords [coords colour]
   (apply hash-map (interleave coords (repeat colour))))
 
 (defn- update-playfield [playfield]
-  (let [{:keys [active-tetromino-coords active-tetromino-colour base-coords]} playfield]
-    (if (contiguous-with-base? active-tetromino-coords (keys base-coords))
-      (let [next-tetromino (rand-nth db/tetrominos)]
-        (-> playfield
-            ;; wipe active tetromino piece
-            (dissoc :active-tetromino-coords)
-            ;; update base coords to include tetromino piece
-            (assoc :base-coords (merge base-coords (merge-colour-with-coords active-tetromino-coords active-tetromino-colour)))
-            ;; set up next tetromino to fall from the sky
-            ;; TODO pull this out to helper
-            (assoc :active-tetromino-base-coords (:coords next-tetromino))
-            (assoc :active-tetromino-colour (:colour next-tetromino))
-            (assoc :active-tetromino-tag (:tag next-tetromino))
-            (assoc :active-tetromino-rotation-matrix-id 0)))
-      (update-in playfield [:active-tetromino-base-coords] translate-tetromino [0 1] (:active-tetromino-rotation-matrix-id playfield)))))
+  (let [active-tetromino (:active-tetromino playfield)
+        {:keys [coords colour tag rotation-matrix]} active-tetromino
+        rotated-coords (rotate coords rotation-matrix)
+        base-coords (:base-coords playfield)]
+    (if (contiguous? rotated-coords base-coords)
+      (-> playfield
+          ;; wipe active tetromino piece
+          (dissoc :active-tetromino)
+          ;; update base coords to include tetromino piece
+          (assoc :base-coords (merge base-coords (merge-colour-with-coords rotated-coords colour)))
+          ;; set up next tetromino to fall from the sky
+          (assoc :active-tetromino (rand-nth db/tetrominos)))
+      (update-in playfield [:active-tetromino] translate [0 1]))))
 
 (rf/reg-event-db
  ::start-game-timer

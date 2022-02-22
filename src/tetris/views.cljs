@@ -44,8 +44,9 @@
   (let [rows-count 16
         cols-count 10
         cell-size  35
-        {:keys [:active-tetromino-colour :base-coords]} @(rf/subscribe [::subs/playfield])
-        active-tetromino-coords @(rf/subscribe [::subs/active-tetromino-coords])]
+        {:keys [:colour :coords :rotation-matrix]} @(rf/subscribe [::subs/active-tetromino])
+        rotated-coords (events/rotate coords rotation-matrix)
+        base-coords @(rf/subscribe [::subs/base-coords])]
     [:div {:class ["relative"]}
      [:table
       {:class ["table-fixed border-2"]
@@ -59,7 +60,7 @@
             ^{:key j}
             [:td
              {:style {:background-color (cond
-                                          (coord-in? [j i] active-tetromino-coords) active-tetromino-colour
+                                          (coord-in? [j i] rotated-coords) colour
                                           (coord-in? [j i] (keys base-coords)) (get base-coords [j i])
                                           :else "#ffffff")}
               :class ["p-0 border border-purple-400 text-center select-none"]}])])]]]))

@@ -9,19 +9,14 @@
    (:elapsed-game-time db)))
 
 (rf/reg-sub
- ::playfield
+ ::active-tetromino
  (fn [db]
-   (:playfield db)))
+   (get-in db [:playfield :active-tetromino])))
 
 (rf/reg-sub
- ::active-tetromino-coords
- (fn [{:keys [:playfield]}]
-   (let [rotation-matrix (events/get-rotation-matrix-by-id-and-tag
-                          (:active-tetromino-rotation-matrix-id playfield)
-                                 (:active-tetromino-tag playfield))
-         active-coords    (events/apply-rotation-matrix (:active-tetromino-base-coords playfield) rotation-matrix)]
-     (println active-coords)
-     active-coords)))
+ ::base-coords
+ (fn [db]
+   (get-in db [:playfield :base-coords])))
 
 (rf/reg-sub
  ::timer-interval-id
